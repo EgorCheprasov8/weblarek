@@ -20,3 +20,12 @@ export const settings = {
 
 };
 
+export const validationErrors = {
+    payment: 'Не выбран вид оплаты',
+    address: 'Укажите адрес',
+    email: 'Укажите емэйл',
+    phone: 'Укажите телефон',
+};
+
+export const PRODUCTS_ENDPOINT = '/product/';
+export const ORDER_ENDPOINT = '/order/';
