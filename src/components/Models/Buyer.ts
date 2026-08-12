@@ -1,12 +1,18 @@
 import { IBuyer, IBuyerModel, TPayment, TValidationErrors } from '../../types';
-import { validationErrors } from '../../utils/constants';
+import { IEvents } from '../base/Events';
+import { validationErrors, appEvents } from '../../utils/constants';
 
 export class Buyer implements IBuyerModel {
     protected payment: TPayment = '';
     protected email: string = '';
     protected phone: string = '';
     protected address: string = '';
-
+    protected events: IEvents;
+ 
+    constructor(events: IEvents) {
+        this.events = events;
+    }
+ 
     setData(data: Partial<IBuyer>): void {
         if (data.payment !== undefined) {
             this.payment = data.payment;
@@ -20,6 +26,7 @@ export class Buyer implements IBuyerModel {
         if (data.address !== undefined) {
             this.address = data.address;
         }
+        this.events.emit(appEvents.buyerChanged);
     }
 
     getData(): IBuyer {
@@ -36,6 +43,7 @@ export class Buyer implements IBuyerModel {
         this.email = '';
         this.phone = '';
         this.address = '';
+        this.events.emit(appEvents.buyerChanged);
     }
 
     validate(): TValidationErrors {

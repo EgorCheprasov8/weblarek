@@ -64,3 +64,60 @@ export interface IOrderResult {
     id: string;
     total: number;
 }
+
+export type TCardCatalog = Pick<
+    IProduct,
+    'id' | 'title' | 'price' | 'category' | 'image'
+>;
+ 
+export type TCardPreview = TCardCatalog & {
+    description: string;
+    buttonLabel: string;
+    buttonDisabled: boolean;
+};
+ 
+export type TCardBasket = Pick<IProduct, 'id' | 'title' | 'price'> & {
+    index: number;
+};
+
+export type TPage = {
+    counter: number;
+    catalog: HTMLElement[];
+    locked: boolean;
+};
+ 
+export type TModal = {
+    content: HTMLElement;
+};
+ 
+export type TBasket = {
+    items: HTMLElement[];
+    total: number;
+    buttonDisabled: boolean;
+};
+ 
+export type TSuccess = {
+    total: number;
+};
+
+export type TFormState = {
+    valid: boolean;
+    errors: string;
+};
+ 
+export type TOrderForm = TFormState & Pick<IBuyer, 'payment' | 'address'>;
+ 
+export type TContactsForm = TFormState & Pick<IBuyer, 'email' | 'phone'>;
+
+export type TCardEvent = {
+    id: string;
+};
+ 
+export type TPaymentEvent = {
+    payment: TPayment;
+};
+ 
+export type TInputEvent = {
+    field: keyof IBuyer;
+    value: string;
+};

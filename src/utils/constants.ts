@@ -29,3 +29,39 @@ export const validationErrors = {
 
 export const PRODUCTS_ENDPOINT = '/product/';
 export const ORDER_ENDPOINT = '/order/';
+
+export const appEvents = {
+    catalogChanged: 'catalog:changed',
+    catalogSelected: 'catalog:selected',
+    cartChanged: 'cart:changed',
+    buyerChanged: 'buyer:changed',
+    cardSelect: 'card:select',
+    cardBuy: 'card:buy',
+    cardRemove: 'card:remove',
+    basketOpen: 'basket:open',
+    basketOrder: 'basket:order',
+    orderInput: 'order:input',
+    orderSubmit: 'order:submit',
+    orderPayment: 'order:payment',
+    contactsInput: 'contacts:input',
+    contactsSubmit: 'contacts:submit',
+    modalOpen: 'modal:open',
+    modalClose: 'modal:close',
+    successClose: 'success:close',
+};
+
+export const uiLabels = {
+    currency: 'синапсов',
+    priceless: 'Бесценно',
+    spent: 'Списано',
+    addToCart: 'В корзину',
+    removeFromCart: 'Удалить из корзины',
+    unavailable: 'Недоступно',
+};
+
+export const cssClasses = {
+    modalActive: 'modal_active',
+    pageLocked: 'page__wrapper_locked',
+    paymentActive: 'button_alt-active',
+};
+
