@@ -21,10 +21,14 @@ export class ContactsForm extends Form<TContactsForm> {
     }
  
     set email(value: string) {
-        this.emailInput.value = value;
+        if (this.emailInput.value !== value) {
+            this.emailInput.value = value;
+        }
     }
- 
+
     set phone(value: string) {
-        this.phoneInput.value = value;
+        if (this.phoneInput.value !== value) {
+            this.phoneInput.value = value;
+        }
     }
 }

@@ -45,7 +45,6 @@ export const appEvents = {
     orderPayment: 'order:payment',
     contactsInput: 'contacts:input',
     contactsSubmit: 'contacts:submit',
-    modalOpen: 'modal:open',
     modalClose: 'modal:close',
     successClose: 'success:close',
 };
@@ -61,7 +60,6 @@ export const uiLabels = {
 
 export const cssClasses = {
     modalActive: 'modal_active',
-    pageLocked: 'page__wrapper_locked',
     paymentActive: 'button_alt-active',
 };
 

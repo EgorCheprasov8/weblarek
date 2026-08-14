@@ -10,7 +10,8 @@ import { Catalog } from './components/Models/Catalog';
 import { Cart } from './components/Models/Cart';
 import { Buyer } from './components/Models/Buyer';
 
-import { Page } from './components/View/Page';
+import { Header } from './components/View/Header';
+import { Gallery } from './components/View/Gallery';
 import { Modal } from './components/View/Modal';
 import { Basket } from './components/View/Basket';
 import { Success } from './components/View/Success';
@@ -31,13 +32,15 @@ const buyer = new Buyer(events);
 const api = new Api(API_URL);
 const larekApi = new LarekApi(api);
 
-const pageWrapper = ensureElement<HTMLElement>('.page__wrapper');
-const modalContainer = ensureElement<HTMLElement>('#modal-container');
-
-const page = new Page(pageWrapper, events);
-const modal = new Modal(modalContainer, events);
+const header = new Header(ensureElement<HTMLElement>('.header'), events);
+const gallery = new Gallery(ensureElement<HTMLElement>('.gallery'));
+const modal = new Modal(ensureElement<HTMLElement>('#modal-container'), events);
 const basket = new Basket(cloneTemplate<HTMLElement>('#basket'), events);
 const success = new Success(cloneTemplate<HTMLElement>('#success'), events);
+const cardPreview = new CardPreview(
+    cloneTemplate<HTMLElement>('#card-preview'),
+    events
+);
 const orderForm = new OrderForm(
     cloneTemplate<HTMLFormElement>('#order'),
     events
@@ -46,27 +49,6 @@ const contactsForm = new ContactsForm(
     cloneTemplate<HTMLFormElement>('#contacts'),
     events
 );
-
-function renderBasket(): void {
-    const items = cart.getItems().map((item, index) => {
-        const card = new CardBasket(
-            cloneTemplate<HTMLElement>('#card-basket'),
-            events
-        );
-        return card.render({
-            id: item.id,
-            title: item.title,
-            price: item.price,
-            index: index + 1,
-        });
-    });
-
-    basket.render({
-        items,
-        total: cart.getTotalPrice(),
-        buttonDisabled: cart.getItemsCount() === 0,
-    });
-}
 
 function getButtonLabel(price: number | null, inCart: boolean): string {
     if (price === null) {
@@ -80,10 +62,11 @@ events.on(appEvents.catalogChanged, () => {
     const cards = catalog.getItems().map((item) => {
         const card = new CardCatalog(
             cloneTemplate<HTMLElement>('#card-catalog'),
-            events
+            () => {
+                events.emit<TCardEvent>(appEvents.cardSelect, { id: item.id });
+            }
         );
         return card.render({
-            id: item.id,
             title: item.title,
             price: item.price,
             category: item.category,
@@ -91,7 +74,7 @@ events.on(appEvents.catalogChanged, () => {
         });
     });
 
-    page.render({ catalog: cards });
+    gallery.render({ catalog: cards });
 });
 
 // Выбран товар для подробного просмотра
@@ -101,29 +84,42 @@ events.on(appEvents.catalogSelected, () => {
         return;
     }
 
-    const card = new CardPreview(
-        cloneTemplate<HTMLElement>('#card-preview'),
-        events
-    );
-    const content = card.render({
-        id: product.id,
-        title: product.title,
-        price: product.price,
-        category: product.category,
-        image: product.image,
-        description: product.description,
-        buttonLabel: getButtonLabel(product.price, cart.hasItem(product.id)),
-        buttonDisabled: product.price === null,
+    modal.render({
+        content: cardPreview.render({
+            title: product.title,
+            price: product.price,
+            category: product.category,
+            image: product.image,
+            description: product.description,
+            buttonLabel: getButtonLabel(product.price, cart.hasItem(product.id)),
+            buttonDisabled: product.price === null,
+        }),
     });
-
-    modal.render({ content });
     modal.open();
 });
 
 // Изменилось содержимое корзины
 events.on(appEvents.cartChanged, () => {
-    page.render({ counter: cart.getItemsCount() });
-    renderBasket();
+    const items = cart.getItems().map((item, index) => {
+        const card = new CardBasket(
+            cloneTemplate<HTMLElement>('#card-basket'),
+            () => {
+                events.emit<TCardEvent>(appEvents.cardRemove, { id: item.id });
+            }
+        );
+        return card.render({
+            title: item.title,
+            price: item.price,
+            index: index + 1,
+        });
+    });
+
+    header.render({ counter: cart.getItemsCount() });
+    basket.render({
+        items,
+        total: cart.getTotalPrice(),
+        buttonDisabled: cart.getItemsCount() === 0,
+    });
 });
 
 // Изменились данные покупателя
@@ -142,11 +138,14 @@ events.on(appEvents.buyerChanged, () => {
         valid: orderErrors.length === 0,
         errors: orderErrors,
         payment: data.payment,
+        address: data.address,
     });
 
     contactsForm.render({
         valid: contactsErrors.length === 0,
         errors: contactsErrors,
+        email: data.email,
+        phone: data.phone,
     });
 });
 
@@ -159,8 +158,8 @@ events.on<TCardEvent>(appEvents.cardSelect, ({ id }) => {
 });
 
 // Кнопка покупки или удаления в подробной карточке
-events.on<TCardEvent>(appEvents.cardBuy, ({ id }) => {
-    const product = catalog.getItemById(id);
+events.on(appEvents.cardBuy, () => {
+    const product = catalog.getSelectedItem();
     if (!product) {
         return;
     }
@@ -184,20 +183,13 @@ events.on<TCardEvent>(appEvents.cardRemove, ({ id }) => {
 
 // Открытие корзины
 events.on(appEvents.basketOpen, () => {
-    renderBasket();
     modal.render({ content: basket.render() });
     modal.open();
 });
 
 // Переход к оформлению
 events.on(appEvents.basketOrder, () => {
-    const data = buyer.getData();
-    modal.render({
-        content: orderForm.render({
-            payment: data.payment,
-            address: data.address,
-        }),
-    });
+    modal.render({ content: orderForm.render() });
     modal.open();
 });
 
@@ -213,13 +205,7 @@ events.on<TInputEvent>(appEvents.orderInput, ({ field, value }) => {
 
 // Переход ко второй форме
 events.on(appEvents.orderSubmit, () => {
-    const data = buyer.getData();
-    modal.render({
-        content: contactsForm.render({
-            email: data.email,
-            phone: data.phone,
-        }),
-    });
+    modal.render({ content: contactsForm.render() });
     modal.open();
 });
 
@@ -254,16 +240,11 @@ events.on(appEvents.contactsSubmit, () => {
         });
 });
 
-// Блокировка прокрутки страницы
-events.on(appEvents.modalOpen, () => {
-    page.render({ locked: true });
-});
-
+// Закрытие модального окна
 events.on(appEvents.modalClose, () => {
-    page.render({ locked: false });
+    modal.close();
 });
 
-// Закрытие экрана успешного заказа
 events.on(appEvents.successClose, () => {
     modal.close();
 });

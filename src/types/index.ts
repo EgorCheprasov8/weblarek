@@ -64,28 +64,29 @@ export interface IOrderResult {
     id: string;
     total: number;
 }
-
-export type TCardCatalog = Pick<
-    IProduct,
-    'id' | 'title' | 'price' | 'category' | 'image'
->;
  
+export type TCardBase = Pick<IProduct, 'title' | 'price'>;
+
+export type TCardCatalog = TCardBase & Pick<IProduct, 'category' | 'image'>;
+
 export type TCardPreview = TCardCatalog & {
     description: string;
     buttonLabel: string;
     buttonDisabled: boolean;
 };
- 
-export type TCardBasket = Pick<IProduct, 'id' | 'title' | 'price'> & {
+
+export type TCardBasket = TCardBase & {
     index: number;
 };
 
-export type TPage = {
+export type THeader = {
     counter: number;
-    catalog: HTMLElement[];
-    locked: boolean;
 };
- 
+
+export type TGallery = {
+    catalog: HTMLElement[];
+};
+
 export type TModal = {
     content: HTMLElement;
 };

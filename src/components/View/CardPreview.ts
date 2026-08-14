@@ -1,18 +1,18 @@
-import { Card } from './Card';
+import { ProductCard } from './ProductCard';
 import { IEvents } from '../base/Events';
-import { TCardPreview, TCardEvent } from '../../types';
+import { TCardPreview } from '../../types';
 import { appEvents } from '../../utils/constants';
 import { ensureElement } from '../../utils/utils';
- 
-export class CardPreview extends Card<TCardPreview> {
+
+export class CardPreview extends ProductCard<TCardPreview> {
     protected descriptionElement: HTMLElement;
     protected actionButton: HTMLButtonElement;
     protected events: IEvents;
- 
+
     constructor(container: HTMLElement, events: IEvents) {
         super(container);
         this.events = events;
- 
+
         this.descriptionElement = ensureElement<HTMLElement>(
             '.card__text',
             this.container
@@ -21,20 +21,20 @@ export class CardPreview extends Card<TCardPreview> {
             '.card__button',
             this.container
         );
- 
+
         this.actionButton.addEventListener('click', () => {
-            this.events.emit<TCardEvent>(appEvents.cardBuy, { id: this.cardId });
+            this.events.emit(appEvents.cardBuy);
         });
     }
- 
+
     set description(value: string) {
         this.setText(this.descriptionElement, value);
     }
- 
+
     set buttonLabel(value: string) {
         this.setText(this.actionButton, value);
     }
- 
+
     set buttonDisabled(state: boolean) {
         this.setDisabled(this.actionButton, state);
     }

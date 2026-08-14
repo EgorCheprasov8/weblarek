@@ -20,6 +20,8 @@ export class Basket extends Component<TBasket> {
             '.basket__button',
             this.container
         );
+
+        this.setDisabled(this.orderButton, true);
  
         this.orderButton.addEventListener('click', () => {
             this.events.emit(appEvents.basketOrder);
